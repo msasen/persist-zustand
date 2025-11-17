@@ -149,7 +149,7 @@ export const createPersistStore = (name, keys, initializer, options) => {
     const store = initializer ? create(initializer) : create(() => ({}));
     const priority = options?.priority || ['url', 'session', 'local'];
     const initialData = {};
-    // Tüm key'leri topla
+    // Collect all keys
     const allKeys = new Set();
     if (urlKeys?.length)
         urlKeys.forEach(k => allKeys.add(k));
@@ -157,33 +157,33 @@ export const createPersistStore = (name, keys, initializer, options) => {
         localKeys.forEach(k => allKeys.add(k));
     if (sessionKeys?.length)
         sessionKeys.forEach(k => allKeys.add(k));
-    // Her key için priority sırasına göre ilk bulunan storage'dan oku
+    // Read from the first storage found for each key according to priority order
     for (const key of allKeys) {
-        // Bu key hangi storage'larda tanımlı?
+        // Which storages is this key defined in?
         const keyInUrl = urlKeys?.includes(key) ?? false;
         const keyInLocal = localKeys?.includes(key) ?? false;
         const keyInSession = sessionKeys?.includes(key) ?? false;
-        // Priority sırasına göre kontrol et
+        // Check according to priority order
         for (const storageType of priority) {
             if (storageType === 'url' && keyInUrl) {
                 const urlData = readFromUrl(name, [key]);
                 if (urlData[key] !== undefined) {
                     initialData[key] = urlData[key];
-                    break; // Bu key için bulundu, diğer storage'ları kontrol etme
+                    break; // Found for this key, don't check other storages
                 }
             }
             else if (storageType === 'session' && keyInSession) {
                 const sessionData = readFromSessionStorage(name, [key]);
                 if (sessionData[key] !== undefined) {
                     initialData[key] = sessionData[key];
-                    break; // Bu key için bulundu
+                    break; // Found for this key
                 }
             }
             else if (storageType === 'local' && keyInLocal) {
                 const localData = readFromLocalStorage(name, [key]);
                 if (localData[key] !== undefined) {
                     initialData[key] = localData[key];
-                    break; // Bu key için bulundu
+                    break; // Found for this key
                 }
             }
         }
