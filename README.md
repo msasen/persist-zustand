@@ -14,7 +14,7 @@ The **URL Storage** mechanism allows encoding selected state values into URL que
 * Bookmark compatibility
 * Navigation through state changes using browser history controls
 * State persistence across page reloads
-* Base64 encoding support for large payloads
+* Base64 encoding support for special characters
 
 **Example:**
 
@@ -160,9 +160,11 @@ const useNavigationStore = createPersistStore(
 )
 ```
 
+**Explanation:** The `history: ['page', 'tab']` option specifies that only changes to `page` and `tab` keys will create browser history entries. Changes to `modal` will update the URL but won't create history entries, allowing users to navigate back through page and tab changes while modal state is handled separately.
+
 ### 2. Base64 Encoding Support
 
-Automatically encodes large data payloads to Base64 when they exceed the threshold, reducing URL length for better browser compatibility.
+Automatically encodes data payloads to Base64 when they exceed the threshold, useful for handling special characters and binary data in URLs.
 
 ```typescript
 import { createPersistStore } from 'persist-zustand'
@@ -185,6 +187,8 @@ const useLargeDataStore = createPersistStore(
   }
 )
 ```
+
+**Explanation:** The `base64: { enabled: true, threshold: 500 }` option enables Base64 encoding when the data string length exceeds 500 characters. When enabled, the data is encoded to Base64 and a flag (`largeData_encoded=1`) is added to the URL to indicate encoding. This is useful for handling special characters and ensuring URL compatibility, though Base64 encoding increases the final URL length.
 
 ### 3. Debounced Writes
 
@@ -212,6 +216,8 @@ const useSearchStore = createPersistStore(
   }
 )
 ```
+
+**Explanation:** The `debounceDelay: 300` option sets a 300ms delay before writing to storage. If state changes occur within this window, only the final state is written. This prevents multiple storage writes during rapid updates (like typing in a search box), improving performance and reducing storage operations.
 
 ### 4. URL-Based Filter State
 
@@ -241,6 +247,8 @@ const useFilterStore = createPersistStore(
 )
 ```
 
+**Explanation:** The `urlKeys: ['category', 'sortBy', 'page']` option specifies that only these three keys will be stored in the URL query parameters. When these values change, they are automatically synced to the URL, making the filtered state shareable via URL and bookmarkable. Other state properties (if any) are not persisted to the URL.
+
 ### 5. Persistent User Preferences
 
 Stores user preferences that persist across browser sessions, ideal for theme, language, and notification settings.
@@ -269,6 +277,8 @@ const useUserPreferencesStore = createPersistStore(
   )
 )
 ```
+
+**Explanation:** The `localKeys: ['theme', 'language', 'notifications']` option stores these keys in `localStorage`, which persists data across browser sessions. When the user closes and reopens the browser, these preferences are automatically restored. This is ideal for user settings that should persist long-term.
 
 ### 6. Session-Based Temporary Data
 
@@ -305,6 +315,8 @@ const useCartStore = createPersistStore(
 )
 ```
 
+**Explanation:** The `sessionKeys: ['items', 'total']` option stores these keys in `sessionStorage`, which persists data only for the current browser tab session. When the tab is closed, the data is cleared. This is perfect for temporary data like shopping carts that should persist during navigation but not across browser restarts.
+
 ### 7. Combined Storage Strategy
 
 Uses multiple storage backends simultaneously, storing different parts of state in URL, localStorage, and sessionStorage based on their persistence needs.
@@ -333,6 +345,13 @@ const useAppStore = createPersistStore(
 )
 ```
 
+**Explanation:** This example demonstrates using all three storage types together:
+- `urlKeys: ['view', 'filter']` - Stores view and filter state in the URL for shareability
+- `localKeys: ['theme', 'settings']` - Stores theme and settings in localStorage for persistence across sessions
+- `sessionKeys: ['tempData']` - Stores temporary data in sessionStorage that clears when the tab closes
+
+Each key is stored in its designated storage backend, allowing fine-grained control over data persistence.
+
 ### 8. Custom Storage Priority
 
 Defines the order in which storage backends are checked when the same key exists in multiple storages, allowing fine-grained control over data precedence.
@@ -354,6 +373,8 @@ const useDataStore = createPersistStore(
   }
 )
 ```
+
+**Explanation:** The `priority: ['local', 'url', 'session']` option defines the read order when the same key exists in multiple storages. In this example, if `value` exists in both localStorage and URL, the value from localStorage is used first. If not found, it checks the URL, then sessionStorage. The default priority is `['url', 'session', 'local']`.
 
 ## 🔧 API Reference
 
