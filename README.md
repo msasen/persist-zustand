@@ -54,17 +54,21 @@ const useFilterStore = createPersistStore(
 ## 📦 Installation
 
 ```bash
-npm install zustand
+npm install persist-zustand
 ```
 
-Add the provided store file (`src/store.ts`) to your project.
+**Note:** This package requires `zustand` as a peer dependency. Make sure you have `zustand` installed in your project:
+
+```bash
+npm install zustand
+```
 
 ## 🎓 Quick Start
 
 ### Using URL Storage
 
 ```typescript
-import { createPersistStore } from './store'
+import { createPersistStore } from 'persist-zustand'
 
 const useCounterStore = createPersistStore(
   'counter',
