@@ -19,25 +19,47 @@ The **URL Storage** mechanism allows encoding selected state values into URL que
 **Example:**
 
 ```typescript
+import { createPersistStore } from 'persist-zustand'
+import { combine } from 'zustand/middleware'
+
 const useFilterStore = createPersistStore(
   'filters',
-  { urlKeys: ['category', 'sort', 'page'] },
-  (set) => ({
-    category: 'all',
-    sort: 'price-asc',
-    page: 1,
-    setCategory: (cat) => set({ category: cat })
-  })
+  {
+    urlKeys: ['category', 'sort', 'page'], // optional
+    localKeys: ['preferences'], // optional
+    sessionKeys: ['tempData'] // optional
+  },
+  combine(
+    {
+      category: 'all',
+      sort: 'price-asc',
+      page: 1,
+      preferences: {},
+      tempData: null
+    },
+    (set) => ({
+      setCategory: (cat) => set({ category: cat }),
+      setSort: (sort) => set({ sort }),
+      setPage: (page) => set({ page })
+    })
+  ),
+  {
+    priority: ['url', 'session', 'local'], // optional
+    history: ['category', 'page'], // optional
+    base64: { // optional
+      enabled: false,
+      threshold: 100
+    },
+    debounceDelay: 100 // optional
+  }
 )
 
 // URL: ?filters={"category":"electronics","sort":"price-asc","page":2}
 ```
 
-### ✨ Multiple Storage Backends
+### ✨ Priority System
 
-* **localStorage**: Persistent across browser sessions
-* **sessionStorage**: Valid within the current browser tab
-* **Priority System**: Select which storage backend is read first
+Select which storage backend is read first when the same key exists in multiple storages.
 
 ### 🎯 Selective Key Handling
 
@@ -293,12 +315,12 @@ const useDashboardStore = createPersistStore(
 createPersistStore<TFn>(
   name: string,
   keys: {
-    urlKeys?: string[],
-    localKeys?: string[],
-    sessionKeys?: string[]
+    urlKeys?: string[], // optional
+    localKeys?: string[], // optional
+    sessionKeys?: string[] // optional
   },
-  initializer?: TFn,
-  options?: PersistStoreOptions
+  initializer?: TFn, // optional
+  options?: PersistStoreOptions // optional
 )
 ```
 
@@ -306,13 +328,13 @@ createPersistStore<TFn>(
 
 ```typescript
 interface PersistStoreOptions {
-  priority?: ('url' | 'session' | 'local')[]
-  history?: string[]
-  base64?: {
+  priority?: ('url' | 'session' | 'local')[] // optional
+  history?: string[] // optional
+  base64?: { // optional
     enabled?: boolean
     threshold?: number
   }
-  debounceDelay?: number
+  debounceDelay?: number // optional
 }
 ```
 
