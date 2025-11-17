@@ -1,0 +1,42 @@
+{
+  "name": "persist-zustand",
+  "version": "0.1.0",
+  "description": "Zustand store creator with URL, localStorage, and sessionStorage persistence support",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "zustand",
+    "persist",
+    "url",
+    "localStorage",
+    "sessionStorage",
+    "state-management",
+    "react"
+  ],
+  "author": "",
+  "license": "MIT",
+  "peerDependencies": {
+    "zustand": "^4.0.0 || ^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "jsdom": "^27.2.0",
+    "typescript": "~5.9.3",
+    "vitest": "^4.0.9",
+    "zustand": "^5.0.0"
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ]
+}
+

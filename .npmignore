@@ -1,0 +1,12 @@
+node_modules
+dist
+*.test.ts
+*.test.js
+.vscode
+.idea
+*.log
+.DS_Store
+coverage
+.vitest
+example
+
