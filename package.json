@@ -1,6 +1,6 @@
 {
   "name": "persist-zustand",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Zustand store creator with URL, localStorage, and sessionStorage persistence support",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
