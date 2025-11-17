@@ -25,9 +25,9 @@ import { combine } from 'zustand/middleware'
 const useFilterStore = createPersistStore(
   'filters',
   {
-    urlKeys: ['category', 'sort', 'page'], // optional
-    localKeys: ['preferences'], // optional
-    sessionKeys: ['tempData'] // optional
+    urlKeys: ['category', 'sort', 'page'], 
+    localKeys: ['preferences'], 
+    sessionKeys: ['tempData']
   },
   combine(
     {
@@ -42,16 +42,7 @@ const useFilterStore = createPersistStore(
       setSort: (sort) => set({ sort }),
       setPage: (page) => set({ page })
     })
-  ),
-  {
-    priority: ['url', 'session', 'local'], // optional
-    history: ['category', 'page'], // optional
-    base64: { // optional
-      enabled: false,
-      threshold: 100
-    },
-    debounceDelay: 100 // optional
-  }
+  )
 )
 
 // URL: ?filters={"category":"electronics","sort":"price-asc","page":2}
@@ -89,20 +80,44 @@ npm install zustand
 
 ### Using URL Storage
 
+
 ```typescript
 import { createPersistStore } from 'persist-zustand'
+import { combine } from 'zustand/middleware'
 
-const useCounterStore = createPersistStore(
-  'counter',
+const useFilterStore = createPersistStore(
+  'filters',
   {
-    urlKeys: ['count']
+    urlKeys: ['category', 'sort', 'page'], // optional
+    localKeys: ['preferences'], // optional
+    sessionKeys: ['tempData'] // optional
   },
-  (set) => ({
-    count: 0,
-    increment: () => set((s) => ({ count: s.count + 1 })),
-    decrement: () => set((s) => ({ count: s.count - 1 }))
-  })
+  combine(
+    {
+      category: 'all',
+      sort: 'price-asc',
+      page: 1,
+      preferences: {},
+      tempData: null
+    },
+    (set) => ({
+      setCategory: (cat) => set({ category: cat }),
+      setSort: (sort) => set({ sort }),
+      setPage: (page) => set({ page })
+    })
+  ),
+  {
+    priority: ['url', 'session', 'local'], // optional
+    history: ['category', 'page'], // optional
+    base64: { // optional
+      enabled: false,
+      threshold: 100
+    },
+    debounceDelay: 100 // optional
+  }
 )
+
+// URL: ?filters={"category":"electronics","sort":"price-asc","page":2}
 ```
 
 **Capabilities:**
@@ -112,142 +127,56 @@ const useCounterStore = createPersistStore(
 * Browser navigation restores previous states
 * Bookmarks preserve state configuration
 
-## 📚 Detailed Usage Examples
+## 📚 Usage Examples
 
-### 1. URL-Based Filter State
+### 1. Browser History Integration
 
-```typescript
-const useFilterStore = createPersistStore(
-  'filters',
-  {
-    urlKeys: ['category', 'sortBy', 'page']
-  },
-  (set) => ({
-    category: 'all',
-    sortBy: 'date',
-    page: 1,
-    setCategory: (category) => set({ category }),
-    setSortBy: (sortBy) => set({ sortBy }),
-    setPage: (page) => set({ page })
-  })
-)
-```
-
-### 2. Persistent User Preferences (localStorage)
+Enables browser back/forward button navigation through state changes. When specified keys change, a new history entry is created.
 
 ```typescript
-const useUserPreferencesStore = createPersistStore(
-  'preferences',
-  {
-    localKeys: ['theme', 'language', 'notifications']
-  },
-  (set) => ({
-    theme: 'light',
-    language: 'tr',
-    notifications: true,
-    setTheme: (theme) => set({ theme }),
-    setLanguage: (language) => set({ language }),
-    toggleNotifications: () => 
-      set((s) => ({ notifications: !s.notifications }))
-  })
-)
-```
+import { createPersistStore } from 'persist-zustand'
+import { combine } from 'zustand/middleware'
 
-### 3. Session-Based Temporary Data (sessionStorage)
-
-```typescript
-const useCartStore = createPersistStore(
-  'cart',
-  {
-    sessionKeys: ['items', 'total']
-  },
-  (set) => ({
-    items: [],
-    total: 0,
-    addItem: (item) => set((s) => ({
-      items: [...s.items, item],
-      total: s.total + item.price
-    })),
-    removeItem: (id) =>
-      set((s) => ({
-        items: s.items.filter((i) => i.id !== id),
-        total: s.items
-          .filter((i) => i.id !== id)
-          .reduce((sum, i) => sum + i.price, 0)
-      }))
-  })
-)
-```
-
-### 4. Combined Storage Strategy
-
-```typescript
-const useAppStore = createPersistStore(
-  'app',
-  {
-    urlKeys: ['view', 'filter'],
-    localKeys: ['theme', 'settings'],
-    sessionKeys: ['tempData']
-  },
-  (set) => ({
-    view: 'grid',
-    filter: 'all',
-    theme: 'light',
-    settings: { fontSize: 14 },
-    tempData: null
-  })
-)
-```
-
-### 5. Custom Storage Priority
-
-```typescript
-const useDataStore = createPersistStore(
-  'data',
-  {
-    urlKeys: ['value'],
-    localKeys: ['value'],
-    sessionKeys: ['value']
-  },
-  (set) => ({ value: 0 }),
-  {
-    priority: ['local', 'url', 'session']
-  }
-)
-```
-
-### 6. Browser History Integration
-
-```typescript
 const useNavigationStore = createPersistStore(
   'nav',
   {
     urlKeys: ['page', 'tab', 'modal']
   },
-  (set) => ({
-    page: 'home',
-    tab: 'overview',
-    modal: null,
-    setPage: (page) => set({ page }),
-    setTab: (tab) => set({ tab }),
-    openModal: (modal) => set({ modal })
-  }),
+  combine(
+    {
+      page: 'home',
+      tab: 'overview',
+      modal: null
+    },
+    (set) => ({
+      setPage: (page) => set({ page }),
+      setTab: (tab) => set({ tab }),
+      openModal: (modal) => set({ modal })
+    })
+  ),
   {
     history: ['page', 'tab']
   }
 )
 ```
 
-### 7. Base64 Encoding Support
+### 2. Base64 Encoding Support
+
+Automatically encodes large data payloads to Base64 when they exceed the threshold, reducing URL length for better browser compatibility.
 
 ```typescript
+import { createPersistStore } from 'persist-zustand'
+import { combine } from 'zustand/middleware'
+
 const useLargeDataStore = createPersistStore(
   'largeData',
   { urlKeys: ['data'] },
-  (set) => ({
-    data: { items: [] },
-    setData: (data) => set({ data })
-  }),
+  combine(
+    { data: { items: [] } },
+    (set) => ({
+      setData: (data) => set({ data })
+    })
+  ),
   {
     base64: {
       enabled: true,
@@ -257,53 +186,171 @@ const useLargeDataStore = createPersistStore(
 )
 ```
 
-### 8. Debounced Writes
+### 3. Debounced Writes
+
+Delays storage writes until state changes stop, reducing excessive writes during rapid updates and improving performance.
 
 ```typescript
+import { createPersistStore } from 'persist-zustand'
+import { combine } from 'zustand/middleware'
+
 const useSearchStore = createPersistStore(
   'search',
   { urlKeys: ['query', 'results'] },
-  (set) => ({
-    query: '',
-    results: [],
-    setQuery: (query) => set({ query }),
-    setResults: (results) => set({ results })
-  }),
+  combine(
+    {
+      query: '',
+      results: []
+    },
+    (set) => ({
+      setQuery: (query) => set({ query }),
+      setResults: (results) => set({ results })
+    })
+  ),
   {
     debounceDelay: 300
   }
 )
 ```
 
-### 9. Comprehensive Dashboard Example
+### 4. URL-Based Filter State
 
+Stores filter state in URL query parameters, enabling shareable links and bookmark support for filtered views.
 
 ```typescript
-const useDashboardStore = createPersistStore(
-  'dashboard',
+import { createPersistStore } from 'persist-zustand'
+import { combine } from 'zustand/middleware'
+
+const useFilterStore = createPersistStore(
+  'filters',
   {
-    urlKeys: ['viewMode', 'selectedId'],
-    localKeys: ['preferences', 'layout'],
-    sessionKeys: ['tempFilters', 'draft']
+    urlKeys: ['category', 'sortBy', 'page']
   },
-  (set) => ({
-    viewMode: 'grid',
-    selectedId: null,
-    preferences: { theme: 'dark', fontSize: 16 },
-    layout: { sidebar: true, columns: 3 },
-    tempFilters: {},
-    draft: null,
-    setViewMode: (mode) => set({ viewMode: mode }),
-    setSelectedId: (id) => set({ selectedId: id }),
-    updatePreferences: (prefs) =>
-      set((s) => ({ preferences: { ...s.preferences, ...prefs } })),
-    setTempFilters: (filters) => set({ tempFilters: filters })
-  }),
+  combine(
+    {
+      category: 'all',
+      sortBy: 'date',
+      page: 1
+    },
+    (set) => ({
+      setCategory: (category) => set({ category }),
+      setSortBy: (sortBy) => set({ sortBy }),
+      setPage: (page) => set({ page })
+    })
+  )
+)
+```
+
+### 5. Persistent User Preferences
+
+Stores user preferences that persist across browser sessions, ideal for theme, language, and notification settings.
+
+```typescript
+import { createPersistStore } from 'persist-zustand'
+import { combine } from 'zustand/middleware'
+
+const useUserPreferencesStore = createPersistStore(
+  'preferences',
   {
-    priority: ['url', 'local', 'session'],
-    history: ['viewMode'],
-    base64: { enabled: true, threshold: 200 },
-    debounceDelay: 150
+    localKeys: ['theme', 'language', 'notifications']
+  },
+  combine(
+    {
+      theme: 'light',
+      language: 'tr',
+      notifications: true
+    },
+    (set) => ({
+      setTheme: (theme) => set({ theme }),
+      setLanguage: (language) => set({ language }),
+      toggleNotifications: () => 
+        set((s) => ({ notifications: !s.notifications }))
+    })
+  )
+)
+```
+
+### 6. Session-Based Temporary Data
+
+Stores temporary data that persists only within the current browser tab session, perfect for shopping carts and form drafts.
+
+```typescript
+import { createPersistStore } from 'persist-zustand'
+import { combine } from 'zustand/middleware'
+
+const useCartStore = createPersistStore(
+  'cart',
+  {
+    sessionKeys: ['items', 'total']
+  },
+  combine(
+    {
+      items: [],
+      total: 0
+    },
+    (set) => ({
+      addItem: (item) => set((s) => ({
+        items: [...s.items, item],
+        total: s.total + item.price
+      })),
+      removeItem: (id) =>
+        set((s) => ({
+          items: s.items.filter((i) => i.id !== id),
+          total: s.items
+            .filter((i) => i.id !== id)
+            .reduce((sum, i) => sum + i.price, 0)
+        }))
+    })
+  )
+)
+```
+
+### 7. Combined Storage Strategy
+
+Uses multiple storage backends simultaneously, storing different parts of state in URL, localStorage, and sessionStorage based on their persistence needs.
+
+```typescript
+import { createPersistStore } from 'persist-zustand'
+import { combine } from 'zustand/middleware'
+
+const useAppStore = createPersistStore(
+  'app',
+  {
+    urlKeys: ['view', 'filter'],
+    localKeys: ['theme', 'settings'],
+    sessionKeys: ['tempData']
+  },
+  combine(
+    {
+      view: 'grid',
+      filter: 'all',
+      theme: 'light',
+      settings: { fontSize: 14 },
+      tempData: null
+    },
+    (set) => ({})
+  )
+)
+```
+
+### 8. Custom Storage Priority
+
+Defines the order in which storage backends are checked when the same key exists in multiple storages, allowing fine-grained control over data precedence.
+
+```typescript
+import { createPersistStore } from 'persist-zustand'
+import { combine } from 'zustand/middleware'
+
+const useDataStore = createPersistStore(
+  'data',
+  {
+    urlKeys: ['value'],
+    localKeys: ['value'],
+    sessionKeys: ['value']
+  },
+  combine({ value: 0 }, (set) => ({})),
+  {
+    priority: ['local', 'url', 'session']
   }
 )
 ```
